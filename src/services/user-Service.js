@@ -40,6 +40,9 @@ async function signIn(data){
     const jwt = Auth.createToken({id : user.id , email : user.email});
     return jwt;
    } catch (e) {
+    if(e instanceof appError) {
+        throw e;
+    }
      console.log(e);
      throw new appError("someting went wrong", StatusCodes.INTERNAL_SERVER_ERROR);
    }
