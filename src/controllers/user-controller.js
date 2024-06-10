@@ -2,7 +2,7 @@ const {UserService} = require('../services');
 const { StatusCodes} = require ('http-status-codes');
 const { successResponse , errorResponse } = require('../utils/common')
 /*
-POST : /signup
+POST : /user/signup
 req-body {
     email
     password
@@ -27,7 +27,34 @@ async function signUp(req,res){
                   .json(errorResponse);
     }
 }
+/*
+POST : /user/signin
+req-body {
+    email
+    password
+}
+*/
+async function signIn(req,res){
+    try{
+        user = await UserService.signIn({
+            email:req.body.email,
+            password:req.body.password
+        })
+        successResponse.message = "User is successfully signed in"
+        successResponse.data = user;
+        
+        return res.status(StatusCodes.OK)
+                  .json(successResponse);
+    }catch(err){
+      errorResponse.error = err;
+      errorResponse.message = "something went wrong while signIn";
+
+        return res.status(err.statusCode)
+                  .json(errorResponse);
+    }
+}
 
 module.exports = {
-    signUp
+    signUp,
+    signIn
 }
