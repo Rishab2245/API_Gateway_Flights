@@ -19,7 +19,17 @@ function createToken(input){
         } 
 }
 
+function verifyToken(token){
+    try {
+        const decoded = jwt.verify(token, ServerConfig.JWT_SECRET );
+        return decoded;
+    } catch (e) {
+        throw e;
+    }
+}
+
 module.exports = {
     checkPassword,
     createToken,
+    verifyToken,
 }

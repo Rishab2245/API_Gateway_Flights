@@ -40,10 +40,12 @@ async function signIn(req,res){
             email:req.body.email,
             password:req.body.password
         })
+        
         successResponse.message = "User is successfully signed in"
-        successResponse.data = user;
+        successResponse.data = {};
         
         return res.status(StatusCodes.OK)
+                  .set('Authorization',user)
                   .json(successResponse);
     }catch(err){
       errorResponse.error = err;
