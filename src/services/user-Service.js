@@ -11,7 +11,7 @@ const { USER_ROLE_ENUMS } = Enums;
 
 async function createUser(data){
     try{
-        console.log(data);
+        // console.log(data);
         const user = await userRepository.create(data);
         const role = await roleRepository.getRoleByName(USER_ROLE_ENUMS.CUSTOMER);
         user.addRole(role);
@@ -37,12 +37,14 @@ async function createUser(data){
 
 async function signIn(data){
    try {
+    // console.log(data)
     const user = await userRepository.getUserByEmail(data.email);
     if(!user){
         throw new appError("no user found for the given email", StatusCodes.NOT_FOUND);
     }
     const passwordMatch = Auth.checkPassword(data.password , user.password);
     if(!passwordMatch){
+        console.log(passwordMatch);
         throw new appError("invalid password", StatusCodes.BAD_REQUEST);
     }
     const jwt = Auth.createToken({id : user.id , email : user.email});
@@ -60,10 +62,12 @@ async function signIn(data){
 async function isAuthenticated(token){
    
    try {
+    // console.log("token",token);
         if(!token){
         throw new appError("MISSING JWT Token",StatusCodes.BAD_REQUEST);
         }
         const response = Auth.verifyToken(token);
+        // console.log(response);
         const user = await userRepository.get(response.data.id);
         if(!user){
             throw new appError("No User found",StatusCodes.NOT_FOUND);
@@ -86,8 +90,53 @@ async function isAuthenticated(token){
    }
 
 }
+
+
+async function addRoleToUser(data){
+    try {
+     const user = await userRepository.get(data.id);
+     if(!user){
+         throw new appError("no user found for the given id", StatusCodes.NOT_FOUND);
+     }
+     const role = await roleRepository.getRoleByName(data.role);
+     if(!role){
+         throw new appError("no role found for the given role ", StatusCodes.NOT_FOUND);
+     }
+     
+     user.addRole(role);
+     return user;
+    } catch (e) {
+     if(e instanceof appError) {
+         throw e;
+     }
+      console.log(e);
+      throw new appError("someting went wrong", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+ }
+async function isAdmin(id){
+    try {
+     const user = await userRepository.get(id);
+     if(!user){
+         throw new appError("no user found for the given id", StatusCodes.NOT_FOUND);
+     }
+     const role = await roleRepository.getRoleByName(USER_ROLE_ENUMS.ADMIN);
+     return user.hasRole(role);
+
+    } catch (e) {
+     if(e instanceof appError) {
+         throw e;
+     }
+      console.log(e);
+      throw new appError("someting went wrong", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+ }
+
+ 
+ 
 module.exports = {
     createUser,
     signIn,
     isAuthenticated,
+    addRoleToUser,
+    isAdmin
 }

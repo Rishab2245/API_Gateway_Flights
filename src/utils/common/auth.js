@@ -20,8 +20,9 @@ function createToken(input){
 }
 
 function verifyToken(token){
-    try {
+    try {console.log("Verifying");
         const decoded = jwt.verify(token, ServerConfig.JWT_SECRET );
+        console.log("de:",decoded);
         return decoded;
     } catch (e) {
         throw e;

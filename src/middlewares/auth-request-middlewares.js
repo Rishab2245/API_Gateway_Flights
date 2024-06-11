@@ -24,7 +24,7 @@ function validateAuthRequest ( req , res , next){
 async function checkAuth(req,res,next){
     try {
         const bearerHeader = req.headers["authorization"];
-        console.log(req.headers);
+        // console.log(req.headers);
         if(typeof bearerHeader !== 'undefined'){
             bearer = bearerHeader.split(' ');
             bearerToken = bearer[1];
@@ -33,7 +33,9 @@ async function checkAuth(req,res,next){
         }else{
             throw new appError("bearer token not found",StatusCodes.FORBIDDEN);
         }
+        // console.log(req.token);
         const response = await UserService.isAuthenticated(req.token);
+        // console.log(response);
         if(response){
             req.user = response;
             next();
@@ -45,7 +47,28 @@ async function checkAuth(req,res,next){
     }
 
 }
+async function isAdmin(req,res,next){
+    try {
+        // console.log("isAdmin");
+        const response = await UserService.isAdmin(req.user);
+        if(!response){
+            return res
+                .status(StatusCodes.UNAUTHORIZED)
+                .json({message : "User not authorized for this action"})
+        }
+        next();
+    } catch (e) {
+            return res
+                .status(StatusCodes.INTERNAL_SERVER_ERROR)
+                .json(e)
+    }
+
+}
+
+
 module.exports = {
     validateAuthRequest,
     checkAuth,
+    isAdmin
+    
 }
