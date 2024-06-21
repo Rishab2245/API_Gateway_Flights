@@ -23,6 +23,7 @@ function validateAuthRequest ( req , res , next){
 
 async function checkAuth(req,res,next){
     try {
+        console.log("req body" , req.body)
         const bearerHeader = req.headers["authorization"];
         // console.log(req.headers);
         if(typeof bearerHeader !== 'undefined'){
@@ -35,12 +36,14 @@ async function checkAuth(req,res,next){
         }
         // console.log(req.token);
         const response = await UserService.isAuthenticated(req.token);
-        // console.log(response);
-        if(response){
-            req.user = response;
-            next();
+        // console.log("res",response);
+        req.body.userId = response;
+            
+        console.log("2no" , req.body)
+        next();
         }
-    } catch (e) {
+        catch (e) {
+            console.log(e);
             return res
                 .status(StatusCodes.FORBIDDEN)
                 .json(e)
@@ -50,7 +53,7 @@ async function checkAuth(req,res,next){
 async function isAdmin(req,res,next){
     try {
         // console.log("isAdmin");
-        const response = await UserService.isAdmin(req.user);
+        const response = await UserService.isAdmin(req.userId);
         if(!response){
             return res
                 .status(StatusCodes.UNAUTHORIZED)
